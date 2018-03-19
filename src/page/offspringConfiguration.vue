@@ -1,0 +1,387 @@
+<template>
+	<div>
+		<header class="of-header">
+			<span class="of-header-title">编辑列表</span>
+			<span>模块分类</span>
+			<el-select v-model="modelValue" placeholder="请选择">
+				<el-option v-for="item in options" :key="item.modelId" :label="item.modelName" :value="item.modelId">
+				</el-option>
+			</el-select>
+		</header>
+		<div class="of-select">
+			<span>选择时间：</span>
+			<el-date-picker v-model="value6" type="daterange" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期">
+			</el-date-picker>
+			<span>主标题：</span>
+			<input type="search" class="search" placeholder="请输入关键词搜索" v-model="offspringList.title" />
+			<span>状态：</span>
+			<el-select v-model="valueSelect" placeholder="请选择">
+				<el-option v-for="item in optionsTwo" :key="item.status" :label="item.label" :value="item.status">
+				</el-option>
+			</el-select>
+			<el-button type="primary" class="btn_select" @click="search()">查询</el-button>
+		</div>
+		<div>
+			<el-table :data="tableData" border style="width: 100%">
+				<el-table-column prop="priority" label="优先级" width="80">
+					<template slot-scope="scope">
+						<input class="input_text" type="text" v-model="scope.row.priority" @keyup="isNumberPd(scope.$index, scope.row.priority)" />
+					</template>
+				</el-table-column>
+				<el-table-column prop="mainTitle" label="主标题" min-width="100">
+					<template slot-scope="scope">
+						<p class="mc_main_title" @click="mainTitleEnter(scope.$index, false)">{{ scope.row.mainTitle }}</p>
+					</template>
+				</el-table-column>
+				<el-table-column prop="insertTime" label="创建时间" min-width="180">
+				</el-table-column>
+				<el-table-column prop="moduleName" label="目标模块" min-width="180">
+				</el-table-column>
+				<el-table-column label="预览" width="80">
+					<template slot-scope="scope">
+						<p class="mc_main_title" @click="mainTitleEnter(scope.$index, true)">查看</p>
+					</template>
+				</el-table-column>
+				<el-table-column prop="status" label="状态" width="80">
+					<template slot-scope="scope">
+						<p>{{ scope.row.status.name }}</p>
+					</template>
+				</el-table-column>
+				<el-table-column label="功能选项" min-width="220">
+					<template slot-scope="scope">
+						<el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)" :disabled="scope.row.status.delectbtn">删除</el-button>
+						<el-button size="mini" type="primary" @click="issue(scope.$index, scope.row)" :disabled="scope.row.status.fabubtn">发布</el-button>
+						<el-button size="mini" type="primary" @click="tapeOut(scope.$index, scope.row)" :disabled="scope.row.status.xiaxianbtn">下线</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+		</div>
+		<PageMy :offset="2" :firstPage="0" :lastPage="lastPage" :propsPageNumber="propsPageNumber" @fetch="getDataTwoTwo" ref="pageMy"></PageMy>
+		<div class="btn-xinjian">
+			<el-button size="small" type="primary" @click="newHeadTwo()">新建</el-button>
+			<el-button size="small" type="primary" @click="refreshClick">刷新</el-button>
+		</div>
+		<headliner-two v-if="headerShowTwo" @search="search" :contentDataTwo="contentDataTwo" :modelValue="modelValue"  :propsPageNumber="propsPageNumber" :compile="compile"></headliner-two>
+	</div>
+</template>
+
+<script>
+	import { mapActions } from 'vuex'
+	import PageMy from '../components/PageMy'
+	import headlinerTwo from '../components/headlinerTwo'
+	export default {
+		components: { PageMy, headlinerTwo},
+		data() {
+			return {
+				contentDataTwo: {
+					mainTitle: '',
+					pageNoDataTwo: '',
+					id: '',
+					url: '',
+					subTitle: '',
+					imgurl: '',
+					remark: '',
+					moduleName: '',
+				},
+				compile: true,
+				propsPageNumber: 1,
+				lastPage: 1,
+				valueSelect: '',
+				options: [{
+					modelId: '',
+					modelName: '全部'
+				}],
+				optionsTwo: [{
+					status: '',
+					label: '全部'
+				},{
+					status: '1',
+					label: '已发布'
+				},{
+					status: '2',
+					label: '未发布'
+				},{
+					status: '4',
+					label: '已下线'
+				}],
+				modelValue: '',
+				value6: '',
+				value7: '',
+				offspringList: {
+					modelId: '',
+					startTime: '1900-00-00 00:00:00',
+					endTime: '',
+					title: '',
+					status: '',
+					page: '',
+				},
+				tableData: [{
+					insertTime: '1',
+					mainTitle: '1',
+					moduleName: '1',
+					status: '1',
+					id: '',
+					priority: '',
+				}]
+			}
+		},
+		created() {
+			this.getDataTwoTwo(0)
+			this.selectlist({
+					successCallback: () => {
+						this.options.push(...this.$store.getters.inquiewList);
+					},
+					failCallback: () => {
+
+					}
+				})
+		},
+		methods: {
+			...mapActions({
+				offspringlist: 'OFFSPRING_LIST',
+				selectlist: 'INQUIEW_LIST',
+				operate: 'OPERATE',
+				refresh: 'REFRESH',
+				redactTwo: 'REDACT_TWO',
+				redactNewTwo: 'REDACT_NEW_TWO',
+			}),
+			getDataTwoTwo(pageNumber) {
+				this.pageNoDataTwo = pageNumber
+				this.offspringList.page = pageNumber + 1
+				var offspringList = new FormData()
+				offspringList.append('modelId', this.modelValue)                //模版ID
+				offspringList.append('startTime', this.offspringList.startTime)//开始时间
+				offspringList.append('endTime', this.offspringList.endTime)    //结束时间
+				offspringList.append('title', this.offspringList.title)		  //主标题
+				offspringList.append('status', this.valueSelect)			  //状态
+				offspringList.append('page', this.offspringList.page)		  //页面
+//				console.log(this.modelValue+'+'+this.offspringList.startTime+'+'+this.offspringList.title+'+'+this.valueSelect+"+"+this.offspringList.page)
+				this.offspringlist({
+					offspringList,
+					successCallback: () => {
+						var arr = []
+						var v = this.$store.getters.springlist
+//						alert(v)
+						var msg = this.$store.getters.springmsg
+						this.lastPage = Math.ceil(parseInt(msg)/10) -1
+						arr = eval(v);
+						//将获取的值循环便利赋值
+						for(let i = 0; i < arr.length; i++) {
+							if(arr[i].status == 1) {
+								arr[i].status = {
+									name: '已发布',
+									delectbtn: true,
+									fabubtn: true,
+									xiaxianbtn: false,
+								} 
+							}
+							if(arr[i].status == 2) {
+								arr[i].status = {
+									name: '未发布',
+									delectbtn: false,
+									fabubtn: false,
+									xiaxianbtn: true,
+								} 
+							}
+							if(arr[i].status == 4) {
+								arr[i].status = {
+									name: '已下线',
+									delectbtn: false,
+									fabubtn: false,
+									xiaxianbtn: true,
+								} 
+							}
+						}
+//						console.log(arr)
+						this.tableData = arr;
+					},
+					failCallback: () => {
+
+					}
+				});
+				
+			},
+			//输入判定
+			isNumberPd(index, indexContent) {
+//			let contentData = this.tableData[index].priority.replace(/\D/g,'')
+//				console.log(contentData)	
+//				if (contentData > 9) {
+//					contentData = 9;
+//				}
+//				this.tableData[index].priority = contentData
+			},
+//			查询
+			search () {
+				let isNull = null
+				if(this.value6 != isNull){
+					let startTime = this.value6[0]
+					let endTime = this.value6[1]
+					switch (this.value6){
+					case '':
+						this.offspringList.startTime = ''
+						this.offspringList.endTime = ''
+						break;
+					default:
+						this.offspringList.startTime = formatDate(startTime, "yyyy-MM-dd hh:mm:ss")
+						this.offspringList.endTime = formatDate(endTime, "yyyy-MM-dd hh:mm:ss")
+						break;
+					}
+				} else{
+						this.offspringList.startTime = ''
+						this.offspringList.endTime = ''
+					}
+				
+				this.getDataTwoTwo(0)
+				this.$refs.pageMy.pageArrGenerate(0)
+			},
+			handleDelete(index, row) {
+//				console.log(index, row);
+				var operateId = new FormData()
+				operateId.append('id', row.id)	
+				operateId.append('status', 3)	
+				this.operate({
+					operateId,
+					successCallback: () => {
+						this.getDataTwoTwo(this.pageNoDataTwo)
+					},
+					failCallback: () => {
+						alert('err')
+					}
+				})
+			},
+			//发布
+			issue(index, row) {
+				if (this.tableData[index].priority == '' || this.tableData[index].priority == undefined){
+					this.$message.error('请先输入优先级！');
+					return false
+				}
+				let zhengze = /\D/g
+				if (zhengze.test(this.tableData[index].priority)){
+					this.$message.error('优先级不能输入非数字！');
+					return false;
+				}
+				this.refreshClick()
+				var operateId = new FormData()
+				operateId.append('id', row.id)	
+				operateId.append('status', 1)	
+				this.operate({
+					operateId,
+					successCallback: () => {
+						this.getDataTwoTwo(this.pageNoDataTwo)
+					},
+					failCallback: () => {
+						alert('err')
+					}
+				})
+			},
+			//下线
+			tapeOut(index, row) {
+				var operateId = new FormData()
+				operateId.append('id', row.id)	
+				operateId.append('status', 4)	
+				this.operate({
+					operateId,
+					successCallback: () => {
+						this.getDataTwoTwo(this.pageNoDataTwo)
+					},
+					failCallback: () => {
+						alert('err')
+					}
+				})
+			},
+//			刷新
+			refreshClick () {
+				var refData = []
+				for (let i = 0;i<this.tableData.length;i++){
+					var refreshData = {
+						id: '',
+						priority: ''
+					}
+//					let contentData = this.tableData[i].priority.replace(/\D/g,'')
+//					this.tableData[i].priority = contentData
+					if (this.tableData[i].priority != ''&& this.tableData[i].priority != undefined && this.tableData[i].priority != null){
+//						let contentData = this.tableData[i].priority.replace(/\D/g,'')
+//						this.tableData[i].priority = contentData
+						let zhengze = /\D/g
+						if (zhengze.test(this.tableData[i].priority)){
+							this.$message.error('优先级不能输入非数字！');
+							return false;
+						}
+						
+//						if (this.tableData[i].priority.replace(/\D/g,'')){
+//							this.$message.error('优先级框里不能有非数字！');
+//							return false;
+//						}
+//						let contentData = this.tableData[i].priority.replace(/\D/g,'')
+//						this.tableData[i].priority = contentData
+					}else{
+						this.tableData[i].priority = ''
+					}
+					refreshData.id = this.tableData[i].id
+					refreshData.priority = this.tableData[i].priority
+					refData.push(refreshData) 
+				}
+//				console.log(refData)
+				refData = JSON.stringify(refData)
+				
+				var refDataId = new FormData()
+				refDataId.append('arr', refData)
+//				console.log(refDataId)
+//				this.$refs.pageMy.pageArrGenerate(0)
+				this.refresh({
+					refDataId,
+					successCallback: () => {
+						this.getDataTwoTwo(this.pageNoDataTwo)
+					},
+					failCallback: () => {
+						alert('err')
+					}
+				})
+			},
+			//点名称查询可修改
+			mainTitleEnter (index, compile) {
+					var mainId = new FormData()
+					mainId.append('id', this.tableData[index].id)
+					this.compile = compile
+				this.redactTwo({
+					mainId,
+					successCallback: () => {
+//						console.log(this.$store.getters.contentDataTwo)
+						this.contentDataTwo = this.$store.getters.contentDataTwo
+					},
+					failCallback: () => {
+						alert('err')
+					}
+				})
+			},
+//			新建
+			newHeadTwo() {
+				this.compile = false
+//				console.log(this.contentDataTwo)
+				if (this.modelValue != ''){
+						this.contentDataTwo.mainTitle = ''
+						this.contentDataTwo.id = ''
+						this.contentDataTwo.url = ''
+						this.contentDataTwo.subTitle = ''
+						this.contentDataTwo.imgurl = ''
+						this.contentDataTwo.remark = ''
+						this.contentDataTwo.moduleName = this.options[this.modelValue].modelName
+						this.contentDataTwo.moduleId = this.modelValue
+					this.redactNewTwo()
+					this.modelValue != ''
+				}else {
+					this.$message.error('请选择模块分类！');
+				}
+				
+			},
+		},
+		computed: {
+    headerShowTwo () {
+      return this.$store.getters.headerShowTwo
+    }
+  }
+	}
+</script>
+
+<style lang="scss" scoped="scoped">
+</style>
