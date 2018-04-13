@@ -9,6 +9,11 @@
 		  			<el-input type="search" v-model="mainTitle" placeholder="请输入内容" :disabled="compile" :maxlength="50"></el-input>
 		  			<p class="icon_main">*</p>
 		  		</li>
+				  <li>
+		  			<p>内容名称：</p>
+		  			<el-input type="search" v-model="slug" placeholder="请输入内容" :disabled="compile" :maxlength="50"></el-input>
+		  			<p class="icon_main">*</p>
+		  		</li>
 		  		<li>
 		  			<p>标题页面：</p>
 		  			<div class="hl_ul_div">{{ moduleName }}</div>
@@ -74,6 +79,7 @@
 				mainTitle: '', //短信标题
 				moduleName: '', //标题页面
 				url: '',
+				slug: '',
 				subTitle: '',
 				variable1: '',
 				variable2: '',
@@ -85,10 +91,12 @@
 		},
 		props: ['contentData','modelValue','propsPageNumber','compile'],
 		created (){
+			// console.log(this.contentData)
 			this.mainTitle = this.contentData.mainTitle
 			this.id = this.contentData.id
 			this.moduleName = this.contentData.moduleName
 			this.url = this.contentData.url
+			this.slug = this.contentData.slug
 			this.subTitle = this.contentData.subTitle
 			this.variable1 = this.contentData.variable1
 			this.variable2 = this.contentData.variable2
@@ -106,6 +114,11 @@
 				
 			}else {
 				this.mainTitle = ""
+			}
+			if(this.slug != 'null'){
+				
+			}else {
+				this.slug = ""
 			}
 			if(this.subTitle != 'null'){
 				
@@ -158,6 +171,7 @@
 					'mainTitle': this.mainTitle,
 					'url': this.url,
 					'subTitle': this.subTitle,
+					'slug': this.slug,
 					'moduleName':this.moduleName,
 					'moduleId':this.modelValue,
 					'variable1': this.variable1,

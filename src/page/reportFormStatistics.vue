@@ -68,92 +68,92 @@
           min-width="100">
         </el-table-column>
       </el-table-column>
-    </el-table-column>
+    <!-- </el-table-column> -->
   </el-table>
 		</div>
 	</div>
 </template>
 
 <script>
-	import { mapActions } from 'vuex'
-	export default {
-		data() {
-			return {
-				tableData3: [{
-          formtitle: '个人名片',
+import { mapActions } from "vuex";
+export default {
+  data() {
+    return {
+      tableData3: [
+        {
+          formtitle: "个人名片",
           alwaysSend: 20,
           WeChatSend: 15,
           noteSend: 5,
           alwaysOpen: 15,
           WeChatOpen: 10,
           noteOpen: 5,
-          alwaysOpenRate: '75.0%',
-          WeChatOpenRate: '66.7%',
-          noteOpenRate: '100.0%'
-        }],
-        value6: '',
-        startTime: '',
-        endTime: ''
-			}
-		},
-		created() {
-//			this.tableData3.push(...this.$store.getters.formList);
-//			console.log(this.value6)
-			this.getData()
-		},
-		methods: {
-			...mapActions({
-				formlist: 'FORM_LIST',
-			}),
-			handleDelete(index, row) {
-//				console.log(index, row);
-			},
-			getData () {
-//				console.log(this.startTime)
-				var saveList = new FormData()
-				saveList.append('statime', this.startTime)//开始时间
-				saveList.append('endtime', this.endTime)    //结束时间
-				this.formlist({
-					saveList,
-					successCallback: () => {
-						this.tableData3 = this.$store.getters.formList
-					},
-					failCallback: () => {
+          alwaysOpenRate: "75.0%",
+          WeChatOpenRate: "66.7%",
+          noteOpenRate: "100.0%"
+        }
+      ],
+      value6: "",
+      startTime: "",
+      endTime: ""
+    };
+  },
+  created() {
+    //			this.tableData3.push(...this.$store.getters.formList);
+    //			console.log(this.value6)
+    this.getData();
+  },
+  methods: {
+    ...mapActions({
+      formlist: "FORM_LIST"
+    }),
+    handleDelete(index, row) {
+      //				console.log(index, row);
+    },
+    getData() {
+      //				console.log(this.startTime)
+      var saveList = new FormData();
+      saveList.append("statime", this.startTime); //开始时间
+      saveList.append("endtime", this.endTime); //结束时间
+      this.formlist({
+        saveList,
+        successCallback: () => {
+          this.tableData3 = this.$store.getters.formList;
+        },
+        failCallback: () => {}
+      });
+    },
+    //			查询
+    search() {
+      let isNull = null;
+      if (this.value6 != isNull) {
+        //					console.log(this.value6)
+        let startTimeOne = this.value6[0];
+        let endTimeOne = this.value6[1];
+        switch (this.value6) {
+          case "":
+            this.startTime = "";
+            this.endTime = "";
+            break;
+          default:
+            this.startTime = formatDate(startTimeOne, "yyyy-MM-dd hh:mm:ss");
+            this.endTime = formatDate(endTimeOne, "yyyy-MM-dd hh:mm:ss");
+            break;
+        }
+      } else {
+        this.startTime = "";
+        this.endTime = "";
+      }
 
-					}
-				})
-				
-		},
-//			查询
-			search () {
-				let isNull = null
-				if(this.value6 != isNull){
-//					console.log(this.value6)
-					let startTimeOne = this.value6[0]
-					let endTimeOne = this.value6[1]
-					switch (this.value6){
-					case '':
-						this.startTime = ''
-						this.endTime = ''
-						break;
-					default:
-						this.startTime = formatDate(startTimeOne, "yyyy-MM-dd hh:mm:ss")
-						this.endTime = formatDate(endTimeOne, "yyyy-MM-dd hh:mm:ss")
-						break;
-					}
-				} else{
-						this.startTime = ''
-						this.endTime = ''
-					}
-				
-				this.getData(0)
-			},
-		selectData () {
-//			console.log(this.value6);
-		}
-		}
-	}
+      this.getData(0);
+    },
+    selectData() {
+      //			console.log(this.value6);
+    }
+  }
+};
 </script>
 
 <style lang="scss" scoped="scoped">
+
 </style>

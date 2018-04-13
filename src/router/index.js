@@ -6,6 +6,7 @@ import offspringConfiguration from '@/page/offspringConfiguration'
 import businessConfiguration from '@/page/businessConfiguration'
 import modulesConfiguration from '@/page/modulesConfiguration'
 import reportFormStatistics from '@/page/reportFormStatistics'
+import download from '@/page/download'
 
 Vue.use(Router)
 
@@ -36,6 +37,10 @@ export default new Router({
       path: '/reportFormStatistics',
       name: 'reportFormStatistics',
       component: reportFormStatistics
+    }, {
+      path: '/download',
+      name: 'download',
+      component: download
     }
   ]
 })

@@ -17,6 +17,11 @@
 						<p class="icon_main" style="color: transparent;">*</p>
 					</li>
 					<li>
+						<p>内容名称：</p>
+						<el-input type="search" v-model="slug" placeholder="请输入内容" :disabled="compile" :maxlength="50"></el-input>
+						<p class="icon_main">*</p>
+					</li>
+					<li>
 						<p>链接：</p>
 						<el-input type="search" v-model="url" placeholder="请输入内容" :disabled="compile"></el-input>
 						<p class="icon_main">*</p>
@@ -53,6 +58,14 @@
 			<el-col :span="12">
 				<ul class="hl-ul">
 					<li>
+						<p>上传分享图片：</p>
+						<div class="hl_ul_div">
+							<input type="file" name="fileimg" id="" value="" @change="getFileTwo($event)" ref="avatarInputtwo"/>
+							<img :src="imageUrlTwo" width="50px" height="50px" ref="imgtwo"/>
+						</div>
+						<p class="icon_main"></p>
+					</li>
+					<li>
 						<p>备注：</p>
 						<div></div>
 					</li>
@@ -84,15 +97,18 @@
 		data() {
 			return {
 				imageUrl: '',
+				imageUrlTwo: '',
 				id: '',
 				moduleId: '',
 				mainTitle: '', //短信标题
 				moduleName: '', //标题页面
 				url: '',
 				subTitle: '',
+				slug: '',
 				remark: '',
 				file: '',
 				fileData: '',
+				fileDatatwo: '',
 				textname:'',
 				textnametwo: ''
 			}
@@ -104,8 +120,10 @@
 						this.id = this.contentDataTwo.id
 						this.moduleName = this.contentDataTwo.moduleName
 						this.url = this.contentDataTwo.url
+						this.slug = this.contentDataTwo.slug
 //						this.subTitle = this.contentDataTwo.subTitle
 						this.imageUrl = '/tpdwt_manager/getFile.html?filePath=' + this.contentDataTwo.accessimgurl
+						this.imageUrlTwo = '/tpdwt_manager/getFile.html?filePath=' + this.contentDataTwo.accshareimgurl
 						if (this.contentDataTwo.remark != 'null'){
 							this.remark = this.contentDataTwo.remark
 						}else {
@@ -116,6 +134,11 @@
 						}else {
 							this.subTitle = ''
 						}
+						if (this.contentDataTwo.slug != 'null'){
+							this.slug = this.contentDataTwo.slug
+						}else {
+							this.slug = ''
+						}
 						this.moduleId = this.contentDataTwo.moduleId
 		},
 		methods: {
@@ -125,30 +148,37 @@
 			}),
 			getFile(event) {
 				this.fileData = event.target.files[0];
-				const refs = this.$refs
-				const elInput = refs.avatarInput
-				const elImg = refs.img
-//				console.log(this.fileData.type)
-//				function getSrc(){
+				console.log(this.fileData)
+				let refs = this.$refs
+				let elInput = refs.avatarInput
+				let elImg = refs.img
 				
-					const reader = new FileReader();
+					let reader = new FileReader();
 					reader.onload = (e) => {
-						const Dsrc = e.target.result;
+						let Dsrc = e.target.result;
 						elImg.src = Dsrc;
+						console.log(Dsrc)
 					};
 					if (elInput.files && elInput.files[0]) {
 						reader.readAsDataURL(elInput.files[0])
 					}
-//				}
-//				const getSize = (src, callback) => {
-//					const imageData = new Image();
-//					imageData.onload = () => {
-//						callback(imageData.width, imageData.height)
-//					}
-//					imageData.src = src
-//				}
 			},
-			
+			getFileTwo(event) {
+				this.fileDatatwo = event.target.files[0];
+				let refstwo = this.$refs
+				let elInputtwo = refstwo.avatarInputtwo
+				let elImgtwo = refstwo.imgtwo
+				
+					let readertwo = new FileReader();
+					readertwo.onload = (e) => {
+						let Dsrctwo = e.target.result;
+						elImgtwo.src = Dsrctwo;
+						console.log(Dsrctwo)
+					};
+					if (elInputtwo.files && elInputtwo.files[0]) {
+						readertwo.readAsDataURL(elInputtwo.files[0])
+					}
+			},
 			edit(){
 				if(this.mainTitle == '' || this.url == '') {
 					this.$message.error('所有带＊号的都必须填写！');
@@ -163,14 +193,15 @@
 					'mainTitle': this.mainTitle,
 					'url': this.url,
 					'subTitle': this.subTitle,
+					'slug': this.slug,
 					'moduleName': this.moduleName,
 					'imgurl': this.imageUrl,
+					'shareimgurl': this.imageUrlTwo,
 					'remark': this.remark,
 					'moduleId': this.moduleId
 				}
 				const isJPG = this.fileData.type === 'image/jpeg';
 				const isLt2M = this.fileData.size / 1024 / 1024 < 1;
-//				console.log(this.fileData.type)
 				if (this.fileData.type != '' && this.fileData.type != undefined && this.fileData.type != null){
 					if(!isJPG) {
 						this.$message.error('上传头像图片只能是 JPG 格式!');
@@ -181,11 +212,19 @@
 						return false;
 					}
 				}
-//				console.log(formSaveData)
+				const isLt2Mtwo = this.fileDatatwo.size / 1024 / 1024 < 1;
+				if (this.fileDatatwo.type != '' && this.fileDatatwo.type != undefined && this.fileDatatwo.type != null){
+					if(!isLt2Mtwo) {
+						this.$message.error('上传头像图片大小不能超过 1MB!');
+						return false;
+					}
+				}
+				console.log(formSaveData)
 				formSaveData = JSON.stringify(formSaveData)
 				textData = JSON.stringify(textData)
 				var image = new FormData()
 				image.append('fileimg', this.$refs.avatarInput.files[0])
+				image.append('fileimgtwo', this.$refs.avatarInputtwo.files[0])
 				image.append('temp', formSaveData)
 				axios({
 					method: 'post',
@@ -194,7 +233,7 @@
 					"Content-Type": "multipart/form-data"
 					}).then((res) => {
 						var result = res.data
-//						console.log(result)
+						console.log(result)
 						if (result.responseCode == 0) {
 							this.$message.success('保存成功');
 							this.$emit('search')

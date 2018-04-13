@@ -346,7 +346,7 @@
 				this.redactTwo({
 					mainId,
 					successCallback: () => {
-//						console.log(this.$store.getters.contentDataTwo)
+						console.log(this.$store.getters.contentDataTwo)
 						this.contentDataTwo = this.$store.getters.contentDataTwo
 					},
 					failCallback: () => {

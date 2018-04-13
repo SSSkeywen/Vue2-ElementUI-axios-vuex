@@ -30,6 +30,7 @@
 							<el-menu-item index="/businessConfiguration">TSR名片配置</el-menu-item>
 							<el-menu-item index="/modulesConfiguration" @click="closeRedact()">短信模版配置</el-menu-item>
 							<el-menu-item index="/reportFormStatistics">报表统计</el-menu-item>
+							<el-menu-item index="/download">清单下载</el-menu-item>
 						</el-submenu>
 						<el-menu-item index="/" @click="logOut()">
 							<i class="el-icon-setting"></i>
